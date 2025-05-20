@@ -1,0 +1,51 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - .env
+
+  web:
+    build: .
+    container_name: crypto-bot-web
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      # підключаємо до Redis за іменем сервісу
+      REDIS_URL: "redis://redis:6379/0"
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  worker:
+    build: .
+    container_name: crypto-bot-worker
+    # Прописуємо url у явному вигляді, без змінних
+    command: ["rq", "worker", "default", "--url", "redis://redis:6379/0"]
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: on-failure
+    env_file:
+      - .env
+
+  scheduler:
+    build: .
+    container_name: crypto-bot-scheduler
+    # Теж саме для scheduler
+    command: ["rqscheduler", "--url", "redis://redis:6379/0"]
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: on-failure
+    env_file:
+      - .env

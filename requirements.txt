@@ -1,0 +1,27 @@
+# Web framework
+fastapi
+uvicorn
+
+# Social media collectors
+tweepy
+praw
+feedparser
+
+# NLP
+vaderSentiment
+transformers
+torch
+spacy
+
+# Trading & data
+ccxt
+pandas
+
+# Storage & queue
+redis
+rq
+rq-scheduler
+
+# Config & HTTP
+python-dotenv
+aiohttp
